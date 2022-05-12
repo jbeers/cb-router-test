@@ -1,36 +1,25 @@
-# Advanced Script Template
+# Purpose
 
-An advanced template with all the bells and whistles in script format
+This repo is meant to demonstrate an issue I'm having with the coldbox router. Per the documentation I expect to be able to pass a domain into the options of the group function and have it applied to the routes within. This doesn't appear to be working.
 
-## License
 
-Apache License, Version 2.0.
+To test
+* Add the following entries to your hosts file
+    * `127.0.01 cb-router-test.com`
+    * `127.0.01 a.cb-router-test.com`
+    * `127.0.01 b.cb-router-test.com`
+* Use `docker run --rm -p 8080:8080 -v /path/to/repo:/app ortussolutions/commandbox` to run
+* Check out config/router.cfc for an explanation of what configuration works and what doesn't
 
-## Important Links
+# Possible Solution
 
-Source Code
+After a bit of digging I found the following in `coldbox/system/web/routing/Router.cfc`
 
-- https://github.com/coldbox-templates/advanced-script
-
-## Quick Installation
-
-Each application templates contains a `box.json` so it can leverage [CommandBox](http://www.ortussolutions.com/products/commandbox) for its dependencies.  
-Just go into each template directory and type:
-
-```bash
-box install
+```
+// this is in addRoute() 
+if ( !variables.withClosure.isEmpty() && !variables.onGroup ) {
+    processWith( arguments );
+}
 ```
 
-This will setup all the needed dependencies for each application template.  You can then type:
-
-```bash
-box server start
-```
-
-And run the application.
-
----
- 
-### THE DAILY BREAD
-
- > "I am the way, and the truth, and the life; no one comes to the Father, but by me (JESUS)" Jn 14:1-12
+I'm not sure how this would impact the system as a whole but I think that the `!variables.onGroup` is misplaced as it will always supress the options when using a group to configure the routes.
